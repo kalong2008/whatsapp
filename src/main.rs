@@ -1,3 +1,4 @@
+use std::io;
 use gql_client::Client;
 use std::collections::HashMap;
 use serde_json::Value;
@@ -10,7 +11,13 @@ use polars::prelude::*;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
    let endpoint = "https://open.api.woztell.com/v3";
    let mut headers = HashMap::new();
-   headers.insert("Authorization", "Bearer [api]}");
+   println!("Please enter the api");
+   let mut api = String::new();
+   io::stdin().read_line(&mut api).expect("Failed to read the Base64 string.");
+   api = api.trim().to_string();
+   let bearer = String::from("Bearer ");
+   let api_header = format!("{}{}", bearer, api);
+   headers.insert("Authorization", api_header);
    let mut query = r#"
         query getChatHistory ($first: IntMax100) {
             apiViewer {
@@ -83,11 +90,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let subscribes_column = Series::new("subscribe", &subscribe_values);
     let tag_column = Series::new("tag", &tag_values);
     let mut df = DataFrame::new(vec![subscribes_column, mobiles_column, tag_column]).unwrap();
-    println!("{:?}", df);
+    //println!("{:?}", df);
 
-   println!("{:?}", external_id_values.len());
-   println!("{:?}", subscribe_values.len());
-   println!("{:?}", tag_values.len());
+   //println!("{:?}", external_id_values.len());
+   //println!("{:?}", subscribe_values.len());
+   //println!("{:?}", tag_values.len());
     let mut file = std::fs::File::create("member.csv").unwrap();
     CsvWriter::new(&mut file).finish(&mut df).unwrap();
 
